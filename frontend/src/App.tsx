@@ -29,7 +29,7 @@ function App() {
             )
           })}
           <li>
-           {isloading && <div className='flex justify-center items-center'><Loader /></div>}
+            {isloading && <div className='flex justify-center items-center'><Loader /></div>}
           </li>
           
         </ul>
