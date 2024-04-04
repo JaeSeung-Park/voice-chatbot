@@ -40,8 +40,8 @@ def get_api_response(prompt):
         # }
         ],
         # prompt=prompt,
-        max_tokens=200,
-        temperature=0.4,
+        max_tokens=100,
+        temperature=0.8,
         stop=[' Human:', ' AI:']
         )
         return response.choices[0].message.content
@@ -63,21 +63,6 @@ def get_bot_response(message, pl):
 i = 0
 # path = f"chatbot\output{i}.mp3"
 
-def tts(bot_response):
-    global i
-    i += 1
-    try:
-        response = client.audio.speech.create(
-        model='tts-1-hd',
-        voice="alloy",
-        input=bot_response,
-        speed=1,
-        response_format = 'mp3'
-        )
-        return response.stream_to_file(f"chatbot\output{i}.mp3")
-    except Exception as e:
-        print('error', e)
-        
 def audio_play():
     # Audio("chatbot\output.wav", rate=20000)
     
@@ -115,6 +100,24 @@ def audio_play():
     # # Now try to open the file with wave
     # with wave.open(file_path) as file:
     #     print('File opened!')
+
+def tts(bot_response):
+    global i
+    i += 1
+    try:
+        response = client.audio.speech.create(
+        model='tts-1-hd',
+        voice="alloy",
+        input=bot_response,
+        speed=1,
+        response_format = 'mp3'
+        )
+        response.stream_to_file(f"chatbot\output{i}.mp3")
+        return audio_play() 
+    except Exception as e:
+        print('error', e)
+        
+
 k = 0
 j = 0
 
@@ -126,7 +129,7 @@ def record_voice():
     CHANNELS = 1
     RATE = 44100
     RECORD_SECONDS = 4
-    WAVE_OUTPUT_FILENAME = f"chatbot\input{k}.wav"
+    WAVE_OUTPUT_FILENAME = f"chatbot\input.wav"
 
     p= pyaudio.PyAudio()
 
@@ -158,31 +161,40 @@ def record_voice():
     wf.close()
     
     # 오디오 파일 로드
-    # j = k - 1
-    # if j > 0:
-    #     sound1 = AudioSegment.from_wav("chatbot\input{j}.wav")
-    #     sound2 = AudioSegment.from_wav("chatbot\input{k}.wav")
-    #     combined_sounds = sound1 + sound2
-    #     combined_sounds.export("chatbot\input{k}.wav", format="wav")
+    
+    j = k - 1
+    if j == 0:
+        # sound1 = AudioSegment.from_wav("chatbot\input{j}.wav")
+        sound2 = AudioSegment.from_wav("chatbot\input.wav")
+        # combined_sounds = sound1 + sound2
+        sound2.export("chatbot\conversation.wav", format="wav")
+    else:
+        sound1 = AudioSegment.from_wav("chatbot\conversation.wav")
+        sound2 = AudioSegment.from_wav("chatbot\input.wav")
+        combined_sounds = sound1 + sound2
+        combined_sounds.export("chatbot\conversation.wav", format="wav")
 
     # print("파일 재생")
     # playsound(WAVE_OUTPUT_FILENAME)
     
 def speech_recognition():
+    t1 = threading.Thread(target=record_voice)
+    t1.daemon = True
     try:
         while True:
             r = sr.Recognizer()
             
             with sr.Microphone() as source:
-                t1 = threading.Thread(target=record_voice)
-                t1.daemon = True
-                t1.start()
                 print("말하는 중입니다...")
+                t1.start()
+                
                 # r.pause_threshold = 1
                 audio = r.listen(source)
                 print("말하기 멈춤")
             try:
                 print(r.recognize_google(audio, language='ko-KR'))
+                with open("chatbot\conversation.html", 'a') as f:
+                    f.write(r.recognize_google(audio, language='ko-KR'))
                 return r.recognize_google(audio, language='ko-KR')
             except sr.UnKnownValueError:
                 print("음성 이해 불가")
