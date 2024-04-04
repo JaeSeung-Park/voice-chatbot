@@ -26,8 +26,8 @@ def chatbot_controller(request):
         # global name, age, interest, diasease
         f = open("chatbot\conversation.html", 'w')
         f.close()
-        try:
-            while True:
+        while True:
+            try:
                 # user_input = request.data['prompt']
                 user_input = speech_recognition()
                 # if(user_input == 'exit'):
@@ -42,8 +42,8 @@ def chatbot_controller(request):
                 tts(response)
                 # audio_play()
                 print(f'AI {response}')
-                return Response(response, status=200)
-        except Exception as e:
-            print('err:', e)
-            return Response('error', status=500)
+                # return Response(response, status=200)
+            except Exception as e:
+                print('err:', e)
+                # return Response('error', status=500)
             

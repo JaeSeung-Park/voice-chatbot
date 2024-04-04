@@ -128,7 +128,7 @@ def record_voice():
     FORMAT = pyaudio.paInt16
     CHANNELS = 1
     RATE = 44100
-    RECORD_SECONDS = 4
+    RECORD_SECONDS = 30
     WAVE_OUTPUT_FILENAME = f"chatbot\input.wav"
 
     p= pyaudio.PyAudio()
@@ -176,10 +176,50 @@ def record_voice():
 
     # print("파일 재생")
     # playsound(WAVE_OUTPUT_FILENAME)
+
+stop_flag = False
+CHUNK = 1024
+FORMAT = pyaudio.paInt16
+CHANNELS = 1
+RATE = 44100
+RECORD_SECONDS = 30
+WAVE_OUTPUT_FILENAME = f"chatbot\input.wav"
+p= pyaudio.PyAudio()
+stream = p.open(format=FORMAT,
+                    channels=CHANNELS,
+                    rate=RATE,
+                    input=True,
+                    frames_per_buffer=CHUNK)
+frames = []
+def record():
+    global stop_flag, frames
+    stop_flag = False
     
+    CHUNK = 1024
+    FORMAT = pyaudio.paInt16
+    CHANNELS = 1
+    RATE = 44100
+    p= pyaudio.PyAudio()
+    stream = p.open(format=FORMAT,
+                    channels=CHANNELS,
+                    rate=RATE,
+                    input=True,
+                    frames_per_buffer=CHUNK)
+    frames = []    
+    while not stop_flag:
+        # for i in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
+        data = stream.read(CHUNK)
+        frames.append(data)
+        
+    # return frames   
+
 def speech_recognition():
-    t1 = threading.Thread(target=record_voice)
-    t1.daemon = True
+    global k, j, stop_flag, frames
+    k += 1
+    frames = []
+    
+    # t1 = threading.Thread(target=record_voice, daemon=True)
+    t1 = threading.Thread(target=record, daemon=True)
     try:
         while True:
             r = sr.Recognizer()
@@ -187,10 +227,38 @@ def speech_recognition():
             with sr.Microphone() as source:
                 print("말하는 중입니다...")
                 t1.start()
+                print("녹음 시작")
                 
                 # r.pause_threshold = 1
                 audio = r.listen(source)
                 print("말하기 멈춤")
+                stop_flag = True
+                print("녹음 완료")
+                t1.join()
+
+                stream.stop_stream()
+                stream.close()
+                p.terminate()
+
+                wf = wave.open(WAVE_OUTPUT_FILENAME, 'wb')
+                wf.setnchannels(CHANNELS)
+                wf.setsampwidth(p.get_sample_size(FORMAT))
+                wf.setframerate(RATE)
+                wf.writeframes(b''.join(frames))
+                wf.close()
+                
+                j = k - 1
+                if j == 0:
+                    # sound1 = AudioSegment.from_wav("chatbot\input{j}.wav")
+                    sound2 = AudioSegment.from_wav("chatbot\input.wav")
+                    # combined_sounds = sound1 + sound2
+                    sound2.export("chatbot\conversation.wav", format="wav")
+                else:
+                    sound1 = AudioSegment.from_wav("chatbot\conversation.wav")
+                    sound2 = AudioSegment.from_wav("chatbot\input.wav")
+                    combined_sounds = sound1 + sound2
+                    combined_sounds.export("chatbot\conversation.wav", format="wav")
+                
             try:
                 print(r.recognize_google(audio, language='ko-KR'))
                 with open("chatbot\conversation.html", 'a') as f:
