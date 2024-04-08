@@ -12,7 +12,7 @@ from pydub import AudioSegment
 
 
 client = OpenAI(
-    api_key='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',
+    api_key='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',
 )
 
 def update_list(message, pl):
@@ -110,10 +110,10 @@ def tts(bot_response):
         voice="alloy",
         input=bot_response,
         speed=1,
-        response_format = 'mp3'
+        response_format = 'wav'
         )
-        response.stream_to_file(f"chatbot\output{i}.mp3")
-        return audio_play() 
+        return response.stream_to_file("media/output.wav")
+        # return audio_play() 
     except Exception as e:
         print('error', e)
         
