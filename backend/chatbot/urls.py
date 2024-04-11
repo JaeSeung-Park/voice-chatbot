@@ -6,4 +6,5 @@ urlpatterns = [
     # todo routes
     # path('talk/', chatbot_controller, name='chatbot-talk'),
     path('chatbot/', views.chatbot, name='chatbot-talk'),
+    path('media/', views.wav, name='wav'),
 ]

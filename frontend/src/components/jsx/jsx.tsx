@@ -254,17 +254,17 @@ const Chatbot: React.FC<Props> = ({ isLoading, setIsLoading, setList, list }) =>
         const formData = new FormData();
         formData.append('text', transcript);
 
-        const response = await axios.post('http://127.0.0.1:8000/api/chatbot/', formData); 
-        // {
+        const response = await axios.post('http://127.0.0.1:8000/api/chatbot/', formData, { responseType: 'blob'}); 
+        // const response = await axios.get('http://127.0.0.1:8000/api/media/', { responseType: 'blob'}); 
         //   headers: {
         //     'Accept': 'audio/*'
         //   }
         // });
-        console.log('Response from backend:', response.data);
+        // console.log('Response from backend:', response);
 
         if (response.status === 200) {
           // Set audio URL
-            setAudioUrl(response.data.output_audio_url);
+            setAudioUrl(response.data);
         } else {
           console.error('Failed to get audio file:', response.statusText);
         }
@@ -287,11 +287,23 @@ const Chatbot: React.FC<Props> = ({ isLoading, setIsLoading, setList, list }) =>
   //   }
   // }, [audioUrl]);
 
+  const playAudio = () => {
+    if (audioUrl) {
+      const audio = new Audio(audioUrl);
+      audio.play().catch(error => {
+        console.error('Error playing audio:', error);
+      });
+    }
+  };
+
   useEffect(() => {
     
     if (audioUrl) {
-      // Create an Audio element
-      const audioElement = new Audio(audioUrl);
+      const audioBlob = new Blob([audioUrl], { type: 'audio/wav' });
+      const url = URL.createObjectURL(audioBlob);
+      const audioElement = new Audio(url);
+      
+      // const audioElement = new Audio(audioUrl);
       audioElement.setAttribute('crossorigin', 'anonymous');
 
       // Wait for the audio to be fully loaded before playing
@@ -315,7 +327,10 @@ const Chatbot: React.FC<Props> = ({ isLoading, setIsLoading, setList, list }) =>
     <div>
       {/* Show both start and stop buttons */}
       {!isRecording ? (
+        <>
         <button onClick={startRecording}>시작</button>
+        <button onClick={playAudio}>재생</button>
+      </>
       ) : (
         <button onClick={stopRecording}>종료</button>
       )}

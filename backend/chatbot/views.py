@@ -11,8 +11,10 @@ import requests
 from django.http import JsonResponse
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
-from django.http import FileResponse
+from django.http import FileResponse, HttpResponse
 from django.contrib.staticfiles.storage import staticfiles_storage
+
+
 
 
 # from IPython.display import Audio
@@ -59,6 +61,17 @@ prompt_list = [
 #                 # return Response('error', status=500)
 
 # @csrf_exempt
+
+@api_view(["GET"])
+def wav(request):
+    fname = 'media/news.wav'
+    f = open(fname, "rb")
+    response = FileResponse(f)
+    response.set_headers(f)
+    # response['Content-Type'] = 'audio/wav'
+    # response['Content-Length'] = os.path.getsize(fname)
+    return response
+
 @api_view(['POST'])
 def chatbot(request):
     if request.method == 'POST':
@@ -164,11 +177,17 @@ def chatbot(request):
         #     # Append audio data from previous file
         #     with open(audio_path, 'rb') as audio_file:
         #         combined_file.write(audio_file.read())
-        print(output_audio_path)
+        # print(output_audio_path)
         # audio_url = request.build_absolute_uri(output_audio_path)
+
         output_audio_url = os.path.join(settings.MEDIA_URL, 'output.wav')
+        f = open('media/output.wav', "rb")
+        response = FileResponse(f)
+        response.set_headers(f)
+        # output_audio_url = os.path.join(settings.MEDIA_URL, 'news.wav')
         print(output_audio_url)
         # Return response 'output_audio_path': output_audio_path, 
-        return JsonResponse({'reply': bot_response, 'output_audio_url': output_audio_url})
+        # return JsonResponse({'output_audio_url': output_audio_url})
+        return response
     else:
         return JsonResponse({'error': 'POST request required'})

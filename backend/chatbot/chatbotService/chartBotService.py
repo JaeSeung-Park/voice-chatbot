@@ -9,10 +9,13 @@ from scipy.io import wavfile
 import speech_recognition as sr
 import threading
 from pydub import AudioSegment
+from django.conf import settings
+
 
 
 client = OpenAI(
-    api_key='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',
+    # api_key='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',
+    api_key=settings.OPENAI_API_KEY,
 )
 
 def update_list(message, pl):
