@@ -4,7 +4,7 @@ from IPython.display import Audio
 from playsound import playsound
 import wave, pyaudio
 import librosa
-import soundfile as sf
+# import soundfile as sf
 from scipy.io import wavfile
 import speech_recognition as sr
 import threading

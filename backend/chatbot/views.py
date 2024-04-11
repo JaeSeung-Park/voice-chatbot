@@ -14,8 +14,15 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import FileResponse, HttpResponse
 from django.contrib.staticfiles.storage import staticfiles_storage
 
-
-
+import numpy as np
+import scipy.io.wavfile
+import math
+# import librosa
+import tempfile
+from io import BytesIO
+from pydub import AudioSegment
+import io
+import moviepy.editor as moviepy
 
 # from IPython.display import Audio
 # from playsound import playsound
@@ -77,25 +84,79 @@ def chatbot(request):
     if request.method == 'POST':
         text = request.POST.get('text', '')
         print(text)
-        # audio = request.FILES.get('audio')
-
+        
+        # audio_chunks = []
+        # for i in range(len(request.FILES)):
+        #     audio_chunk = request.FILES.get(f'audio_chunk_{i}')
+        #     if audio_chunk:
+        #         audio_chunks.append(audio_chunk.read())
+        # print(audio_chunks)
+        
+        audio = request.FILES.get('audio')
+        print(audio)
+        
         # Check if previous audio and text files exist
-        # audio_path = os.path.join(settings.MEDIA_ROOT, 'audio.mp3')
+        audio_path = os.path.join(settings.MEDIA_ROOT, 'input.webm')
+        input_audio_path = os.path.join(settings.MEDIA_ROOT, 'input.wav')
         text_path = os.path.join(settings.MEDIA_ROOT, 'text.txt')
-        output_audio_path = os.path.join(settings.MEDIA_ROOT, 'output.wav')
+        # output_audio_path = os.path.join(settings.MEDIA_ROOT, 'output.wav')
         
         
-        # if not os.path.exists(audio_path):
-        #     open(audio_path, 'wb').close()
+        if not os.path.exists(audio_path):
+            open(audio_path, 'wb').close()
         if not os.path.exists(text_path):
             open(text_path, 'w').close()
 
+        # clip = moviepy.VideoFileClip(audio)
+        # clip.audio.write_audiofile(audio_path)
+
+
         # Append new audio data
+        with open(audio_path, 'ab') as f:
+            for chunk in audio.chunks():
+                f.write(chunk)
+        
+        # with tempfile.NamedTemporaryFile(delete=False) as tmp_wav:
+        #     for chunk in audio.chunks():
+        #         tmp_wav.write(chunk)
+        
         # if audio:
         #     with open(audio_path, 'ab') as f:
         #         for chunk in audio.chunks():
         #             f.write(chunk)
+        
+        # opus_data = BytesIO(audio)
+        # sound = AudioSegment.from_file(opus_data, codec="webm")
+        
+        
+        # rate = 44100
+        # input_audio, _ = librosa.load(sound, sr=rate)
+        # scipy.io.wavfile.write(audio_path, rate, input_audio.astype(np.int16))
+        # # os.unlink(tmp_wav.name)
+        
+        # # 오디오 데이터를 BytesIO 객체로 변환
+        # audio_bytes = io.BytesIO(audio.read())
 
+        # # BytesIO 객체를 파일로 저장
+        # with open(audio_path, 'wb') as f:
+        #     f.write(audio_bytes.read())
+
+        # # AudioSegment로 변환
+        sound = AudioSegment.from_file(audio_path, format="webm")
+        
+        # # AudioSegment를 numpy 배열로 변환
+        # audio_np = np.array(sound.get_array_of_samples())
+        
+        # # 오디오 샘플링 주파수가 44100이 아닌 경우 재샘플링
+        if sound.frame_rate != 44100:
+            sound = sound.set_frame_rate(44100)
+        #     audio_np = np.array(sound.get_array_of_samples())
+        sound.export(input_audio_path, format="wav")
+        # # numpy 배열을 WAV 파일로 저장
+        # rate = 44100
+        # scipy.io.wavfile.write(audio_path, rate, audio_np.astype(np.int16))
+        
+        
         # Append new text data
         with open(text_path, 'a') as f:
             f.write(text + '\n')
@@ -110,7 +171,7 @@ def chatbot(request):
             "content": prompt
         },
         ],
-        max_tokens=50,
+        max_tokens=10,
         temperature=0.8,
         stop=[' Human:', ' AI:']
         )
@@ -180,12 +241,17 @@ def chatbot(request):
         # print(output_audio_path)
         # audio_url = request.build_absolute_uri(output_audio_path)
 
-        output_audio_url = os.path.join(settings.MEDIA_URL, 'output.wav')
+        # output_audio_url = os.path.join(settings.MEDIA_URL, 'output.wav')
+        
+        # with open('media/output.wav', "rb") as f:
+        #     response = FileResponse(f)
+        #     response.set_headers(f)
+        
         f = open('media/output.wav', "rb")
         response = FileResponse(f)
         response.set_headers(f)
         # output_audio_url = os.path.join(settings.MEDIA_URL, 'news.wav')
-        print(output_audio_url)
+        # print(output_audio_url)
         # Return response 'output_audio_path': output_audio_path, 
         # return JsonResponse({'output_audio_url': output_audio_url})
         return response
