@@ -79,6 +79,12 @@ def wav(request):
     # response['Content-Length'] = os.path.getsize(fname)
     return response
 
+
+@api_view(['GET'])
+def endConversation(request):
+    print("api 통신 받음")
+    return Response({'message': '대화가 종료되었습니다.'})
+
 @api_view(['POST'])
 def chatbot(request):
     if request.method == 'POST':

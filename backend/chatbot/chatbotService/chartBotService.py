@@ -3,14 +3,14 @@ from openai import OpenAI
 from IPython.display import Audio
 from playsound import playsound
 import wave, pyaudio
-import librosa
 # import soundfile as sf
 from scipy.io import wavfile
 import speech_recognition as sr
 import threading
 from pydub import AudioSegment
 from django.conf import settings
-
+import numpy as np
+import librosa
 
 
 client = OpenAI(
