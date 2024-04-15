@@ -1199,118 +1199,550 @@
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-import React, { useState, useCallback, useEffect } from "react";
+// import React, { useState, useCallback, useEffect } from "react";
+// import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
+// import axios from "axios";
+
+// interface Props {
+//   isLoading: boolean;
+//   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+//   setList: React.Dispatch<React.SetStateAction<{ prompt: string | null; bot: any; }[]>>;
+//   list: { prompt: string | null; bot: any; }[];
+// }
+// const Chatbot: React.FC<Props> = ({isLoading, setIsLoading, setList, list}) => {
+//   const { transcript, resetTranscript, listening } = useSpeechRecognition();
+//   const [isRecording, setIsRecording] = useState<boolean>(false);
+//   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+//   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+//   const [return_audioUrl, set_return_AudioUrl] = useState<string>('');
+//   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
+
+//   const stopRecording = useCallback(() => {
+//     setIsRecording(false);
+//     SpeechRecognition.stopListening();
+//     if (mediaRecorder) {
+//       mediaRecorder.stop();
+//     }
+//     if (timeoutId) {
+//       clearTimeout(timeoutId);
+//       setTimeoutId(null);
+//     }
+//   }, [mediaRecorder, timeoutId]);
+
+//   const startRecording = (): void => {
+//     setIsRecording(true);
+//     SpeechRecognition.startListening({ continuous: true, language: "ko-KR" });
+//     navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+//       const recorder = new MediaRecorder(stream);
+//       recorder.start();
+//       setMediaRecorder(recorder);
+
+//       recorder.ondataavailable = (e) => {
+//         const audioBlob = e.data;
+//         const audioUrl = URL.createObjectURL(audioBlob);
+//         setAudioUrl(audioUrl);
+//       };
+//     }).catch((error) => {
+//       console.error("Error accessing microphone:", error);
+//     });
+
+//     const newTimeoutId = setTimeout(() => {
+//       if (!listening) {
+//         stopRecording();
+//         console.log("10초 동안 음성 입력이 없어서 녹음을 종료합니다.");
+//       }
+//     }, 10000);
+//     setTimeoutId(newTimeoutId);
+//   };
+
+//   useEffect(() => {
+//     let endOfSpeechTimeoutId: NodeJS.Timeout;
+//     if (listening) {
+//       if (timeoutId) {
+//         clearTimeout(timeoutId);
+//       }
+
+//       endOfSpeechTimeoutId = setTimeout(() => {
+//         if (listening) {
+//           stopRecording();
+//           console.log("음성 입력이 끝났습니다.");
+//         }
+//       }, 5000);
+//     }
+
+//     return () => {
+//       if (endOfSpeechTimeoutId) {
+//         clearTimeout(endOfSpeechTimeoutId);
+//       }
+//     };
+//   }, [listening, stopRecording, timeoutId]);
+
+//   useEffect(() => {
+//     const sendMessage = async () => {
+//       if (audioUrl && transcript.trim() !== '') {
+//         setList(prevList => [...prevList, { prompt: transcript, bot: null }]);
+//         const formData = new FormData();
+//         formData.append('text', transcript);
+//         formData.append("audio", audioUrl);
+
+//         try {
+//           const response = await axios.post('http://127.0.0.1:8000/api/chatbot/', formData, { responseType: 'blob' });
+//           if (response.status === 200) {
+//             const objectUrl = URL.createObjectURL(response.data);
+//             set_return_AudioUrl(objectUrl);
+//           } else {
+//             console.error('Failed to get audio file:', response.statusText);
+//           }
+//         } catch (error) {
+//           console.error('Error sending data:', error);
+//         }
+
+//         resetTranscript();
+//       }
+//     };
+
+//     if (audioUrl && transcript.trim() !== '') {
+//       sendMessage();
+//     }
+//   }, [audioUrl, transcript, resetTranscript, setList]);
+
+//   useEffect(() => {
+//     if (return_audioUrl) {
+//       const audioElement = new Audio(return_audioUrl);
+//       audioElement.play().catch((error) => {
+//         console.error('Error playing audio:', error);
+//       });
+//     }
+//   }, [return_audioUrl]);
+
+//   return (
+//     <div>
+//       {!isRecording ? (
+//         <>
+//           <button onClick={startRecording}>시작</button>
+//         </>
+//       ) : (
+//         <button onClick={stopRecording}>종료</button>
+//       )}
+//       <p>입력: {transcript}</p>
+//     </div>
+//   );
+// };
+
+// export default Chatbot;
+// 4/12 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2
+// 4/12 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2
+// 4/12 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2
+// 4/12 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2
+// 4/12 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2
+// 4/12 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2
+
+// import React, { useState, useCallback, useEffect } from "react";
+// import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
+// import axios from "axios";
+
+// interface Props {
+//   isLoading: boolean;
+//   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+//   setList: React.Dispatch<React.SetStateAction<{ prompt: string | null; bot: any; }[]>>;
+//   list: { prompt: string | null; bot: any; }[];
+// }
+
+// const Chatbot: React.FC<Props> = ({ isLoading, setIsLoading, setList, list }) => {
+//   const { transcript, resetTranscript, listening } = useSpeechRecognition();
+//   const [isRecording, setIsRecording] = useState<boolean>(false);
+//   const [stream, setStream] = useState<MediaStream | null>(null);
+//   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+//   const [audioUrl, setAudioUrl] = useState<Blob | null>(null);
+//   const [return_audioUrl, set_return_AudioUrl] = useState<string>('');
+//   const [timer, setTimer] = useState<number>(0);
+
+//   const startRecording = () => {
+//     setIsRecording(true);
+//     setTimer(0); // Reset the timer
+//     SpeechRecognition.startListening({ language: "ko-KR", continuous: true });
+//     navigator.mediaDevices
+//       .getUserMedia({ audio: true })
+//       .then((stream) => {
+//         const recorder = new MediaRecorder(stream);
+//         recorder.start();
+//         setStream(stream);
+//         setMediaRecorder(recorder);
+//         setAudioUrl(null); // Reset audio URL
+//       })
+//       .catch((error) => {
+//         console.error("Error accessing microphone:", error);
+//       });
+//   };
+
+//   const stopRecording = () => {
+//     setIsRecording(false);
+//     SpeechRecognition.stopListening();
+//     if (mediaRecorder) {
+//       mediaRecorder.stop();
+//     }
+//     if (stream) {
+//       stream.getTracks().forEach((track) => {
+//         track.stop();
+//       });
+//     }
+//     setTimer(0); // Reset the timer when recording stops
+//   };
+
+//   useEffect(() => {
+//     if (timer >= 10 && !isRecording) {
+//       stopRecording();
+//       setTimer(0);
+//       resetTranscript();
+//     }
+//   }, [timer, isRecording, resetTranscript]);
+
+//   // useEffect(() => {
+//   //   if (!isRecording) {
+//   //     setTimer(0); // Reset the timer when recording stops
+//   //   }
+//   // }, [isRecording]);
+
+//   useEffect(() => {
+//     const timerId = setInterval(() => {
+//       if (isRecording) {
+//         setTimer((prevTimer) => prevTimer + 1);
+//       }
+//     }, 1000);
+
+//     return () => clearInterval(timerId);
+//   }, [isRecording]);
+
+//   // Rest of the component code...
+//   useEffect(() => {
+//     const sendMessage = async () => {
+//       try {
+//         if (audioUrl && transcript && transcript.trim() !== '') {
+//           setList(prevList => [...prevList, { prompt: transcript, bot: null }]);
+          
+//           const formData = new FormData();
+//           formData.append('text', transcript);
+//           formData.append("audio", audioUrl);
+//           const response = await axios.post('http://127.0.0.1:8000/api/chatbot/', formData, { responseType: 'blob' }); 
+  
+//           if (response.status === 200) {
+//             set_return_AudioUrl(response.data);
+//           } else {
+//             console.error('Failed to get audio file:', response.statusText);
+//           }
+  
+//           resetTranscript();
+//         }
+//       } catch (error) {
+//         console.error('Error sending data:', error);
+//       }
+//     };
+
+//     if (audioUrl) {
+//       sendMessage();
+//     }
+//   }, [audioUrl, resetTranscript, setList, transcript]);
+
+//   useEffect(() => {
+//     if (listening && mediaRecorder) {
+//       mediaRecorder.ondataavailable = (e) => {
+//         setAudioUrl(e.data);
+//       };
+//     }
+//   }, [listening, mediaRecorder]);
+
+
+//   useEffect(() => {
+//     if (return_audioUrl) {
+//       const audioBlob = new Blob([return_audioUrl], { type: 'audio/wav' });
+//       const url = URL.createObjectURL(audioBlob);
+//       const audioElement = new Audio(url);
+      
+//       audioElement.setAttribute('crossorigin', 'anonymous');
+
+//       // Wait for the audio to be fully loaded before playing
+//       audioElement.addEventListener('canplaythrough', () => {
+//         audioElement.play().then(() => {
+//           // Playback started successfully
+//         }).catch((error) => {
+//           console.error('Error playing audio:', error);
+//         });
+//       });
+
+//       // Handle audio loading errors
+//       audioElement.addEventListener('error', (error) => {
+//         console.error('Error loading audio:', error);
+//       });
+//     }
+//   }, [return_audioUrl]);
+
+//   return (
+//     <div>
+//       {!isRecording ? (
+//         <>
+//           <button onClick={startRecording}>시작</button>
+//         </>
+//       ) : (
+//         <button onClick={stopRecording}>종료</button>
+//       )}
+//       <p>입력: {transcript}</p>
+//       <p>타이머: {timer}</p>
+//     </div>
+//   );
+// };
+
+// export default Chatbot;
+
+//888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
+//888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
+//888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
+//888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
+//888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
+//888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
+//888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
+//888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
+
+// import React, { useState, useCallback, useEffect } from "react";
+// import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
+// import axios from "axios";
+
+// interface Props {
+//   isLoading: boolean;
+//   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+//   setList: React.Dispatch<React.SetStateAction<{ prompt: string | null; bot: any; }[]>>;
+//   list: { prompt: string | null; bot: any; }[];
+// }
+
+// const AudioRecord: React.FC = () => {
+//   const [stream, setStream] = useState<MediaStream | null>(null);
+//   const [media, setMedia] = useState<MediaRecorder | null>(null);
+//   const [onRec, setOnRec] = useState<boolean>(false);
+//   const [audioUrl, setAudioUrl] = useState<Blob | null>(null);
+
+//   const onRecAudio = () => {
+//     navigator.mediaDevices
+//       .getUserMedia({ audio: true })
+//       .then((stream) => {
+//         const mediaRecorder = new MediaRecorder(stream);
+//         mediaRecorder.start();
+//         setStream(stream);
+//         setMedia(mediaRecorder);
+//         setOnRec(true);
+
+//         mediaRecorder.ondataavailable = function (e) {
+//           setAudioUrl(e.data);
+//         };
+//       })
+//       .catch((error) => {
+//         console.error("Error accessing microphone:", error);
+//       });
+//   };
+
+//   const offRecAudio = () => {
+//     if (media && stream) {
+//       media.onstop = function () {
+//         stream.getAudioTracks().forEach(function (track) {
+//           track.stop();
+//         });
+//       };
+
+//       media.stop();
+//       setOnRec(false);
+//     }
+//   };
+
+//   const onSubmitAudioFile = useCallback(() => {
+//     if (audioUrl) {
+//       // 여기서 audioUrl을 사용하여 서버로 전송하거나 처리할 수 있습니다.
+//       console.log("Audio URL:", audioUrl);
+//     }
+//   }, [audioUrl]);
+
+//   return (
+//     <>
+//       <button onClick={onRec ? offRecAudio : onRecAudio}>
+//         {onRec ? "녹음 중지" : "녹음 시작"}
+//       </button>
+//       <button onClick={onSubmitAudioFile}>결과 확인</button>
+//     </>
+//   );
+// };
+
+// export default AudioRecord;
+//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+import React, { useState, useEffect } from "react";
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
 import axios from "axios";
 
 interface Props {
-  isLoading: boolean;
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  setList: React.Dispatch<React.SetStateAction<{ prompt: string | null; bot: any; }[]>>;
-  list: { prompt: string | null; bot: any; }[];
-}
-const Chatbot: React.FC<Props> = ({isLoading, setIsLoading, setList, list}) => {
+    isLoading: boolean;
+    setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+    setList: React.Dispatch<React.SetStateAction<{ prompt: string | null; bot: any; }[]>>;
+    list: { prompt: string | null; bot: any; }[];
+  }
+
+const Chatbot: React.FC<Props> = ({ isLoading, setIsLoading, setList, list }) => {
   const { transcript, resetTranscript, listening } = useSpeechRecognition();
   const [isRecording, setIsRecording] = useState<boolean>(false);
+  const [stream, setStream] = useState<MediaStream | null>(null);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [audioUrl, setAudioUrl] = useState<Blob | null>(null);
   const [return_audioUrl, set_return_AudioUrl] = useState<string>('');
-  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
+  const [count, setCount] = useState<number>(0);
 
-  const stopRecording = useCallback(() => {
+  const startRecording = () => {
+    setIsRecording(true);
+    SpeechRecognition.startListening({ language: "ko-KR", continuous: true });
+    navigator.mediaDevices
+      .getUserMedia({ audio: true })
+      .then((stream) => {
+        const recorder = new MediaRecorder(stream);
+        recorder.start();
+        setStream(stream);
+        setMediaRecorder(recorder);
+        setAudioUrl(null); // Reset audio URL
+      })
+      .catch((error) => {
+        console.error("Error accessing microphone:", error);
+      });
+  };
+
+  const stopRecording = () => {
     setIsRecording(false);
     SpeechRecognition.stopListening();
     if (mediaRecorder) {
       mediaRecorder.stop();
     }
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-      setTimeoutId(null);
+    if (stream) {
+      stream.getTracks().forEach((track) => {
+        track.stop();
+      });
     }
-  }, [mediaRecorder, timeoutId]);
+  };
+  // const startConversation = 
 
-  const startRecording = (): void => {
-    setIsRecording(true);
-    SpeechRecognition.startListening({ continuous: true, language: "ko-KR" });
-    navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-      const recorder = new MediaRecorder(stream);
-      recorder.start();
-      setMediaRecorder(recorder);
-
-      recorder.ondataavailable = (e) => {
-        const audioBlob = e.data;
-        const audioUrl = URL.createObjectURL(audioBlob);
-        setAudioUrl(audioUrl);
-      };
-    }).catch((error) => {
-      console.error("Error accessing microphone:", error);
-    });
-
-    const newTimeoutId = setTimeout(() => {
-      if (!listening) {
-        stopRecording();
-        console.log("10초 동안 음성 입력이 없어서 녹음을 종료합니다.");
-      }
-    }, 10000);
-    setTimeoutId(newTimeoutId);
+  const endConversation = async () => {
+    try {
+      // Send GET request to the backend
+      const response = await axios.get('http://127.0.0.1:8000/api/endConversation/');
+      // Extract message from response
+      const message = response.data.message;
+      console.log(message); // Print the message
+      // Clear conversation list and reset transcript
+      setList([]);
+      resetTranscript();
+    } catch (error) {
+      console.error('Error ending conversation:', error);
+    }
   };
 
+
   useEffect(() => {
-    let endOfSpeechTimeoutId: NodeJS.Timeout;
-    if (listening) {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
+    if (listening){
+      const id = setInterval(() => {
+        setCount((count) => count + 1);
+      }, 1000);
 
-      endOfSpeechTimeoutId = setTimeout(() => {
-        if (listening) {
+      if (transcript){
+        if(count === 3 && listening) {
+          clearInterval(id);
+          console.log(transcript);
+          console.log("자동 보내기");
           stopRecording();
-          console.log("음성 입력이 끝났습니다.");
-        }
-      }, 5000);
-    }
-
-    return () => {
-      if (endOfSpeechTimeoutId) {
-        clearTimeout(endOfSpeechTimeoutId);
+          setCount(0);
+        };
+      } else{
+        if(count === 10 && listening) {
+          clearInterval(id);
+          console.log(transcript);
+          console.log("종료");
+          stopRecording();
+          setCount(0);
+        };
       }
-    };
-  }, [listening, stopRecording, timeoutId]);
+
+      return () => clearInterval(id);
+    }
+  }, [count, listening]);
+
+  useEffect(() => {
+    setCount(0)
+  }, [transcript])
+
+
+
+
 
   useEffect(() => {
     const sendMessage = async () => {
-      if (audioUrl && transcript.trim() !== '') {
-        setList(prevList => [...prevList, { prompt: transcript, bot: null }]);
-        const formData = new FormData();
-        formData.append('text', transcript);
-        formData.append("audio", audioUrl);
-
-        try {
-          const response = await axios.post('http://127.0.0.1:8000/api/chatbot/', formData, { responseType: 'blob' });
+      try {
+        if (audioUrl && transcript && transcript.trim() !== '') {
+          setList(prevList => [...prevList, { prompt: transcript, bot: null }]);
+          
+          const formData = new FormData();
+          formData.append('text', transcript);
+          formData.append("audio", audioUrl);
+          const response = await axios.post('http://127.0.0.1:8000/api/chatbot/', formData, { responseType: 'blob' }); 
+  
           if (response.status === 200) {
-            const objectUrl = URL.createObjectURL(response.data);
-            set_return_AudioUrl(objectUrl);
+            set_return_AudioUrl(response.data);
           } else {
             console.error('Failed to get audio file:', response.statusText);
           }
-        } catch (error) {
-          console.error('Error sending data:', error);
+  
+          resetTranscript();
         }
-
-        resetTranscript();
+      } catch (error) {
+        console.error('Error sending data:', error);
       }
     };
 
-    if (audioUrl && transcript.trim() !== '') {
+    if (audioUrl) {
       sendMessage();
     }
-  }, [audioUrl, transcript, resetTranscript, setList]);
+  }, [audioUrl, resetTranscript, setList, transcript]);
+
+  useEffect(() => {
+    if (listening && mediaRecorder) {
+      mediaRecorder.ondataavailable = (e) => {
+        setAudioUrl(e.data);
+      };
+    }
+  }, [listening, mediaRecorder]);
+
 
   useEffect(() => {
     if (return_audioUrl) {
-      const audioElement = new Audio(return_audioUrl);
-      audioElement.play().catch((error) => {
-        console.error('Error playing audio:', error);
+      const audioBlob = new Blob([return_audioUrl], { type: 'audio/wav' });
+      const url = URL.createObjectURL(audioBlob);
+      const audioElement = new Audio(url);
+      
+      audioElement.setAttribute('crossorigin', 'anonymous');
+
+      // Wait for the audio to be fully loaded before playing
+      audioElement.addEventListener('canplaythrough', () => {
+        audioElement.play().then(() => {
+          // Playback started successfully
+        }).catch((error) => {
+          console.error('Error playing audio:', error);
+        });
+      });
+
+      // Handle audio loading errors
+      audioElement.addEventListener('error', (error) => {
+        console.error('Error loading audio:', error);
       });
     }
   }, [return_audioUrl]);
@@ -1322,9 +1754,13 @@ const Chatbot: React.FC<Props> = ({isLoading, setIsLoading, setList, list}) => {
           <button onClick={startRecording}>시작</button>
         </>
       ) : (
-        <button onClick={stopRecording}>종료</button>
+        <>
+          <button onClick={stopRecording}>종료</button>
+        </>
       )}
+      <button onClick={endConversation}>대화 종료</button>
       <p>입력: {transcript}</p>
+      <p>timer: {count}</p>
     </div>
   );
 };

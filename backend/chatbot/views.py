@@ -82,7 +82,8 @@ def wav(request):
 
 @api_view(['GET'])
 def endConversation(request):
-    print("api 통신 받음")
+    print("대화 종료")
+    
     return Response({'message': '대화가 종료되었습니다.'})
 
 @api_view(['POST'])
