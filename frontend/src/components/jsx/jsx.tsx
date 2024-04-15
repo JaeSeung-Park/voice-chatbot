@@ -1582,9 +1582,10 @@
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
 import axios from "axios";
+// import { Stream } from "stream";
 
 interface Props {
     isLoading: boolean;
@@ -1595,15 +1596,16 @@ interface Props {
 
 const Chatbot: React.FC<Props> = ({ isLoading, setIsLoading, setList, list }) => {
   const { transcript, resetTranscript, listening } = useSpeechRecognition();
-  const [isRecording, setIsRecording] = useState<boolean>(false);
+  // const [isRecording, setIsRecording] = useState<boolean>(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [audioUrl, setAudioUrl] = useState<Blob | null>(null);
   const [return_audioUrl, set_return_AudioUrl] = useState<string>('');
   const [count, setCount] = useState<number>(0);
+  // const [isConversation, setIsConversation] = useState<boolean>(true);
 
   const startRecording = () => {
-    setIsRecording(true);
+
     SpeechRecognition.startListening({ language: "ko-KR", continuous: true });
     navigator.mediaDevices
       .getUserMedia({ audio: true })
@@ -1617,10 +1619,10 @@ const Chatbot: React.FC<Props> = ({ isLoading, setIsLoading, setList, list }) =>
       .catch((error) => {
         console.error("Error accessing microphone:", error);
       });
+
   };
 
-  const stopRecording = () => {
-    setIsRecording(false);
+  const stopRecording = useCallback(() => {
     SpeechRecognition.stopListening();
     if (mediaRecorder) {
       mediaRecorder.stop();
@@ -1630,23 +1632,40 @@ const Chatbot: React.FC<Props> = ({ isLoading, setIsLoading, setList, list }) =>
         track.stop();
       });
     }
-  };
-  // const startConversation = 
+  }, [mediaRecorder, stream]);
 
-  const endConversation = async () => {
+  const startConversation = async () => {
+    startRecording();
+    try {
+      const response = await axios.get('http://127.0.0.1:8000/api/startConversation/');
+      const message = response.data.message;
+      console.log(message); 
+    } catch (error) {
+      console.error('Error starting conversation:', error);
+    }
+  };
+
+  const endConversation = useCallback(async () => {
+    stopRecording();
+    setList([]);
+    resetTranscript();
+    setCount(0);
     try {
       // Send GET request to the backend
       const response = await axios.get('http://127.0.0.1:8000/api/endConversation/');
       // Extract message from response
       const message = response.data.message;
       console.log(message); // Print the message
-      // Clear conversation list and reset transcript
-      setList([]);
-      resetTranscript();
+
+      // const response2 = await axios.get('http://127.0.0.1:8000/api/getSummary/');
+      // // Extract message from response
+      // const message2 = response2.data.message;
+      // console.log(message2); // Print the message
+      // // Clear conversation list and reset transcript
     } catch (error) {
       console.error('Error ending conversation:', error);
     }
-  };
+  }, [resetTranscript, setList, stopRecording]);
 
 
   useEffect(() => {
@@ -1667,15 +1686,15 @@ const Chatbot: React.FC<Props> = ({ isLoading, setIsLoading, setList, list }) =>
         if(count === 10 && listening) {
           clearInterval(id);
           console.log(transcript);
-          console.log("종료");
-          stopRecording();
+          // console.log("종료");
+          endConversation();
           setCount(0);
         };
       }
 
       return () => clearInterval(id);
     }
-  }, [count, listening]);
+  }, [count, listening, transcript, endConversation, stopRecording]);
 
   useEffect(() => {
     setCount(0)
@@ -1722,7 +1741,6 @@ const Chatbot: React.FC<Props> = ({ isLoading, setIsLoading, setList, list }) =>
     }
   }, [listening, mediaRecorder]);
 
-
   useEffect(() => {
     if (return_audioUrl) {
       const audioBlob = new Blob([return_audioUrl], { type: 'audio/wav' });
@@ -1739,17 +1757,23 @@ const Chatbot: React.FC<Props> = ({ isLoading, setIsLoading, setList, list }) =>
           console.error('Error playing audio:', error);
         });
       });
-
       // Handle audio loading errors
       audioElement.addEventListener('error', (error) => {
         console.error('Error loading audio:', error);
+      });
+
+      audioElement.addEventListener('ended', () => {
+        setTimeout(() => {
+          startRecording(); // Start recording after a delay
+        }, 3000); // 3-second delay
       });
     }
   }, [return_audioUrl]);
 
   return (
     <div>
-      {!isRecording ? (
+      <p><button onClick={startConversation}>대화 시작</button></p>
+      {/* {!isRecording && conversationStarted ? (
         <>
           <button onClick={startRecording}>시작</button>
         </>
@@ -1757,8 +1781,8 @@ const Chatbot: React.FC<Props> = ({ isLoading, setIsLoading, setList, list }) =>
         <>
           <button onClick={stopRecording}>종료</button>
         </>
-      )}
-      <button onClick={endConversation}>대화 종료</button>
+      )} */}
+      <p><button onClick={endConversation}>대화 종료</button></p>
       <p>입력: {transcript}</p>
       <p>timer: {count}</p>
     </div>

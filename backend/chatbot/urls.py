@@ -8,5 +8,6 @@ urlpatterns = [
     path('chatbot/', views.chatbot, name='chatbot-talk'),
     path('media/', views.wav, name='wav'),
     path('endConversation/', views.endConversation, name='endConversation'),
-    
+    path('startConversation/', views.startConversation, name='startConversation'),
+    path('getSummary/', views.getSummary, name='getSummary'),
 ]
