@@ -14,7 +14,6 @@ import librosa
 
 
 client = OpenAI(
-    # api_key='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',
     api_key=settings.OPENAI_API_KEY,
 )
 
