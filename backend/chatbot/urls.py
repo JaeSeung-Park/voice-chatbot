@@ -9,5 +9,5 @@ urlpatterns = [
     path('media/', views.wav, name='wav'),
     path('endConversation/', views.endConversation, name='endConversation'),
     path('startConversation/', views.startConversation, name='startConversation'),
-    path('getSummary/', views.getSummary, name='getSummary'),
+    # path('getSummary/', views.getSummary, name='getSummary'),
 ]

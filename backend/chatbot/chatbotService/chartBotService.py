@@ -272,3 +272,10 @@ def speech_recognition():
                 print(f"ERROR: {e}")
     except KeyboardInterrupt:
         pass    
+    
+    
+def delete(path):
+    if os.path.isfile(path):
+        os.remove(path)
+    else:
+        raise ValueError("해당 경로를 확인해주세요")
