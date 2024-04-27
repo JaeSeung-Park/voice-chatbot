@@ -43,3 +43,5 @@ def emotion_classification(input_path):
     predicted_class = np.argmax(predicted_probabilities)
     print("Predicted emotion class:", predicted_class)
     return predicted_class
+
+# print(emotion_classification('backend/media/input.wav'))

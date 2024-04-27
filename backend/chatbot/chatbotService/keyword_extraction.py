@@ -359,15 +359,15 @@ def komoran_tokenizer(sent):
     words = [w for w in words if ('/NN' in w or '/XR' in w or '/VA' in w or '/VV' in w)]
     return words
 
-# with open('media/text.txt', "r", encoding='utf-8') as f:
+# with open('backend/media/text.txt', "r", encoding='utf-8') as f:
 #     sents = f.readlines()
 # print(sents)
 
 # summarizer = KeywordSummarizer(tokenize=komoran_tokenizer, min_count=2, min_cooccurrence=1)
-# test = summarizer.summarize(sents, topk=3)
+# test = summarizer.summarize(sents, topk=1)
 # print(test)
 
 def keyword_extraction(sents):
     summarizer = KeywordSummarizer(tokenize=komoran_tokenizer, min_count=2, min_cooccurrence=1)
-    keyword = summarizer.summarize(sents, topk=3)  
-    return keyword
+    test = summarizer.summarize(sents, topk=1)  
+    return test

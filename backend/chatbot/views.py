@@ -24,8 +24,8 @@ from pydub import AudioSegment
 import io
 import moviepy.editor as moviepy
 
-from .chatbotService.keyword_extraction import keyword_extraction
-from .chatbotService.emotion_classification import emotion_classification
+from .chatbotService.keyword_extraction import *
+from .chatbotService.emotion_classification import *
 import shutil
 
 # from IPython.display import Audio
@@ -96,51 +96,51 @@ def endConversation(request):
     
     print("대화 요약 시작")
     with open('media/text.txt', "r", encoding='utf-8') as f:
-        conversation = f.read()
+        # conversation = f.read()
         text = f.readlines()
-    # print(conversation)
+    # # print(conversation)
     
-    command = ['다음 내용은 혼자 계신 시니어와 말동무 역할인 음성 챗봇간의 일상 생활',
-                '관련 대화 답변 내용이야. 이를 참고해서 혼자 계신 시니어의 일상 활동을',
-                '간략하게 한줄정도로 요약해줘']
+    # command = ['다음 내용은 혼자 계신 시니어와 말동무 역할인 음성 챗봇간의 일상 생활',
+    #             '관련 대화 답변 내용이야. 이를 참고해서 혼자 계신 시니어의 일상 활동을',
+    #             '간략하게 한줄정도로 요약해줘']
     
-    prompt = create_prompt(conversation, command)
-    # print(prompt)
-    response = client.chat.completions.create(
-    model="gpt-4",
-    messages = [
-    {
-        "role": "system",
-        "content": prompt
-    },
-    ],
-    max_tokens=100,
-    temperature=0.8,
-    stop=[' Human:', ' AI:']
-    )
-    print(response)
+    # prompt = create_prompt(conversation, command)
+    # # print(prompt)
+    # response = client.chat.completions.create(
+    # model="gpt-4",
+    # messages = [
+    # {
+    #     "role": "system",
+    #     "content": prompt
+    # },
+    # ],
+    # max_tokens=100,
+    # temperature=0.8,
+    # stop=[' Human:', ' AI:']
+    # )
+    # print(response)
     
-    if response.choices:
-        summary = response.choices[0].message.content 
-    else:
-        summary = "No response from the model."
-    
-    # if bot_response:
-    #     pos = bot_response.find("\ncontent: ")
-    #     bot_response = bot_response[pos + 8:]
+    # if response.choices:
+    #     summary = response.choices[0].message.content 
     # else:
-    #     bot_response = "Something went wrong..."
+    #     summary = "No response from the model."
     
-    print(f'요약: {summary}')
+    # # if bot_response:
+    # #     pos = bot_response.find("\ncontent: ")
+    # #     bot_response = bot_response[pos + 8:]
+    # # else:
+    # #     bot_response = "Something went wrong..."
     
-    # txt말고 데베에 저장
-    summary_path = os.path.join(settings.MEDIA_ROOT, 'summary.txt')
-    with open(summary_path, 'a', encoding='utf-8') as f:
-            f.write(summary)  
+    # print(f'요약: {summary}')
+    
+    # # txt말고 데베에 저장
+    # summary_path = os.path.join(settings.MEDIA_ROOT, 'summary.txt')
+    # with open(summary_path, 'a', encoding='utf-8') as f:
+    #         f.write(summary)  
             
-    # keyword = keyword_extraction(text)
+    keyword = keyword_extraction(text)
+    print(keyword)
     emotion = emotion_classification('media/input.wav')
-    # print(keyword)
     print(emotion)
     
     
@@ -311,6 +311,7 @@ def chatbot(request):
         if response.choices:
         # 선택지가 존재하는 경우 처리
             bot_response = response.choices[0].message.content  # 첫 번째 선택지의 내용을 reply에 할당
+            update_list(bot_response, prompt_list)
         else:
         # 선택지가 존재하지 않는 경우 처리
             bot_response = "No response from the model."
